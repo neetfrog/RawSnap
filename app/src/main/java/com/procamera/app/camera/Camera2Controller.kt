@@ -548,46 +548,62 @@ class Camera2Controller(private val context: Context) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 val chars = cameraCharacteristics ?: throw Exception("No camera characteristics")
                 
-                // Use reflection to access DngCreator
-                val dngCreatorClass = Class.forName("android.media.DngCreator")
-                val constructor = dngCreatorClass.getConstructor(
-                    CameraCharacteristics::class.java,
-                    CaptureResult::class.java
-                )
-                val dngCreator = constructor.newInstance(chars, result)
-                
-                val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmssSSS", Locale.US).format(Date())
-                val fileName = "RAW_$timeStamp.dng"
-                
-                val contentValues = ContentValues().apply {
-                    put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
-                    put(MediaStore.MediaColumns.MIME_TYPE, "image/x-adobe-dng")
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        put(MediaStore.MediaColumns.RELATIVE_PATH, "DCIM/ProCamera")
-                    }
-                }
-                
-                val uri = context.contentResolver.insert(
-                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                    contentValues
-                ) ?: throw Exception("Failed to create MediaStore entry for RAW")
-                
-                context.contentResolver.openOutputStream(uri)?.use { stream ->
-                    // Use reflection to call writeImage
-                    val writeImageMethod = dngCreatorClass.getMethod(
-                        "writeImage",
-                        java.io.OutputStream::class.java,
-                        Image::class.java
+                try {
+                    // Use reflection to access DngCreator
+                    val dngCreatorClass = Class.forName("android.media.DngCreator")
+                    Log.d(TAG, "DngCreator class found")
+                    
+                    // Get constructor with CameraCharacteristics and CaptureResult
+                    val constructor = dngCreatorClass.getDeclaredConstructor(
+                        CameraCharacteristics::class.java,
+                        CaptureResult::class.java
                     )
-                    writeImageMethod.invoke(dngCreator, stream, image)
+                    Log.d(TAG, "DngCreator constructor found")
+                    
+                    val dngCreator = constructor.newInstance(chars, result)
+                    Log.d(TAG, "DngCreator instance created")
+                    
+                    val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmssSSS", Locale.US).format(Date())
+                    val fileName = "RAW_$timeStamp.dng"
+                    
+                    val contentValues = ContentValues().apply {
+                        put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
+                        put(MediaStore.MediaColumns.MIME_TYPE, "image/x-adobe-dng")
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                            put(MediaStore.MediaColumns.RELATIVE_PATH, "DCIM/ProCamera")
+                        }
+                    }
+                    
+                    val uri = context.contentResolver.insert(
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                        contentValues
+                    ) ?: throw Exception("Failed to create MediaStore entry for RAW")
+                    
+                    Log.d(TAG, "MediaStore URI created: $uri")
+                    
+                    context.contentResolver.openOutputStream(uri)?.use { stream ->
+                        // Use reflection to call writeImage(OutputStream, Image)
+                        val writeImageMethod = dngCreatorClass.getDeclaredMethod(
+                            "writeImage",
+                            java.io.OutputStream::class.java,
+                            Image::class.java
+                        )
+                        Log.d(TAG, "writeImage method found")
+                        writeImageMethod.invoke(dngCreator, stream, image)
+                        Log.d(TAG, "writeImage invoked successfully")
+                    } ?: throw Exception("Failed to open output stream")
+                    
+                    // Close the creator
+                    val closeMethod = dngCreatorClass.getDeclaredMethod("close")
+                    closeMethod.invoke(dngCreator)
+                    Log.d(TAG, "DngCreator closed")
+                    
+                    Log.d(TAG, "RAW DNG saved: $fileName")
+                    onRawSaved?.invoke(File(fileName))
+                } catch (reflectionError: Exception) {
+                    Log.e(TAG, "Reflection error in DNG creation: ${reflectionError.message}", reflectionError)
+                    throw reflectionError
                 }
-                
-                // Close the creator
-                val closeMethod = dngCreatorClass.getMethod("close")
-                closeMethod.invoke(dngCreator)
-                
-                Log.d(TAG, "RAW DNG saved: $fileName")
-                onRawSaved?.invoke(File(fileName))
             } else {
                 throw Exception("DNG format requires Android 5.0+")
             }

@@ -1,5 +1,6 @@
 package com.procamera.app.ui.components
 
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -15,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.procamera.app.data.*
@@ -30,6 +32,7 @@ fun TopControls(
     viewModel: CameraViewModel,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -38,6 +41,14 @@ fun TopControls(
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically
     ) {
+        // Gallery/Folder
+        TopIconBtn(
+            icon = Icons.Default.PhotoLibrary,
+            label = "FOLDER",
+            active = false,
+            onClick = { viewModel.openSavedFilesFolder(context) }
+        )
+
         // Flash
         TopIconBtn(
             icon = when (state.settings.flashMode) {

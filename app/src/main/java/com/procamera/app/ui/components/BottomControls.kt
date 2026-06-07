@@ -90,18 +90,14 @@ fun BottomControls(
 
             // Main capture / record button
             CaptureButton(
-                isVideo = state.captureMode == CaptureMode.VIDEO
-                        || state.captureMode == CaptureMode.LOG_VIDEO
-                        || state.captureMode == CaptureMode.SLOW_MO,
+                isVideo = state.captureMode == CaptureMode.VIDEO,
                 isRecording = state.isRecording,
                 isCapturing = state.isCapturing,
                 timerCountdown = state.timerCountdown,
                 onClick = {
                     when {
                         state.isRecording -> viewModel.stopVideoRecording()
-                        state.captureMode in listOf(
-                            CaptureMode.VIDEO, CaptureMode.LOG_VIDEO, CaptureMode.SLOW_MO
-                        ) -> viewModel.startVideoRecording()
+                        state.captureMode == CaptureMode.VIDEO -> viewModel.startVideoRecording()
                         else -> viewModel.capturePhoto()
                     }
                 }

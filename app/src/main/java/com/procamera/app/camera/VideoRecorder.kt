@@ -89,9 +89,17 @@ class VideoRecorder(private val context: Context) {
                 reset()
             }
             currentFile?.also { file ->
-                // Register with MediaStore so it appears in Gallery
-                registerVideoWithMediaStore(file)
-                onVideoSaved?.invoke(file)
+                // Verify file exists and has content
+                if (file.exists() && file.length() > 0) {
+                    Log.d(TAG, "Video file created: ${file.absolutePath} (${file.length()} bytes)")
+                    // Register with MediaStore so it appears in Gallery
+                    registerVideoWithMediaStore(file)
+                    onVideoSaved?.invoke(file)
+                    file
+                } else {
+                    Log.e(TAG, "Video file not created or empty: ${file.absolutePath}")
+                    null
+                }
             }
         } catch (e: RuntimeException) {
             Log.e(TAG, "stop error (recording too short?)", e)
@@ -136,11 +144,18 @@ class VideoRecorder(private val context: Context) {
     }
 
     private fun createVideoFile(): File {
-        val dir = File(
-            context.getExternalFilesDir(android.os.Environment.DIRECTORY_MOVIES),
-            "ProCamera"
-        ).apply { mkdirs() }
+        val baseDir = context.getExternalFilesDir(android.os.Environment.DIRECTORY_MOVIES)
+            ?: throw IllegalStateException("Cannot access external movies directory")
+        val dir = File(baseDir, "ProCamera").apply { 
+            if (!exists()) {
+                if (!mkdirs()) {
+                    Log.w(TAG, "Failed to create directory: ${absolutePath}")
+                }
+            }
+        }
         val ts = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
-        return File(dir, "VID_$ts.mp4")
+        val file = File(dir, "VID_$ts.mp4")
+        Log.d(TAG, "Video file path: ${file.absolutePath}")
+        return file
     }
 }

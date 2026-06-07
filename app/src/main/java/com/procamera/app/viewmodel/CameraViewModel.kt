@@ -146,15 +146,9 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val state = _uiState.value
-                val isLog = state.captureMode == CaptureMode.LOG_VIDEO
-                val isSlow = state.captureMode == CaptureMode.SLOW_MO
-                val fps = when {
-                    isSlow -> 120
-                    else   -> state.settings.frameRate
-                }
                 val recSurf = videoRecorder.prepare(
                     resolution = state.settings.videoResolution,
-                    frameRate = fps,
+                    frameRate = state.settings.frameRate,
                     audioEnabled = true
                 )
                 recordingSurface = recSurf
@@ -162,10 +156,7 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
                 val preview = camera2.previewSurface
                     ?: throw IllegalStateException("No preview surface")
 
-                val videoSettings = if (isLog) state.settings.copy(isLogColorSpace = true)
-                else state.settings
-
-                camera2.createVideoSession(preview, recSurf, videoSettings)
+                camera2.createVideoSession(preview, recSurf, state.settings)
                 videoRecorder.start()
 
                 _uiState.update { it.copy(isRecording = true, recordingDurationSec = 0) }
@@ -234,9 +225,7 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     fun setCaptureMode(mode: CaptureMode) {
-        val isLog = mode == CaptureMode.LOG_VIDEO
         _uiState.update { it.copy(captureMode = mode) }
-        updateSetting { it.copy(isLogColorSpace = isLog) }
     }
 
     fun cycleFlash() {
@@ -266,6 +255,23 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
             else -> 0
         }
         _uiState.update { it.copy(timerSeconds = next) }
+    }
+
+    fun openSavedFilesFolder(context: android.content.Context) {
+        viewModelScope.launch {
+            try {
+                // Open the saved videos in the gallery/MediaStore
+                val mediaIntent = android.content.Intent(
+                    android.content.Intent.ACTION_VIEW,
+                    android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+                ).apply {
+                    addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                context.startActivity(mediaIntent)
+            } catch (e: Exception) {
+                postError("Could not open gallery: ${e.message}")
+            }
+        }
     }
 
     fun toggleManualControls() = _uiState.update { it.copy(showManualControls = !it.showManualControls) }

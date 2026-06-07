@@ -7,10 +7,7 @@ enum class FlashMode { OFF, ON, AUTO, TORCH }
 enum class CaptureMode(val label: String) {
     PHOTO("PHOTO"),
     RAW("RAW"),
-    VIDEO("VIDEO"),
-    LOG_VIDEO("LOG"),
-    SLOW_MO("SLOW-MO"),
-    TIMELAPSE("LAPSE")
+    VIDEO("VIDEO")
 }
 
 enum class GridMode { NONE, THIRDS, SQUARE, GOLDEN }
