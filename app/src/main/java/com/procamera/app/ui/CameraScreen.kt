@@ -47,88 +47,92 @@ fun CameraScreen(viewModel: CameraViewModel) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f)
+                .weight(1f),
+            contentAlignment = Alignment.Center
         ) {
-            // Preview surface
-            ViewfinderSurface(
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(3f / 4f)
-                    .align(Alignment.TopCenter),
-                viewModel = viewModel
-            )
-
-            // ── Grid overlay ───────────────────────────────────────────────────
-            GridOverlay(
-                gridMode = state.gridMode,
-                modifier = Modifier.fillMaxSize()
-            )
-
-            // ── Level indicator ────────────────────────────────────────────────
-            if (state.showLevelIndicator) {
-                LevelIndicator(
-                    pitch = state.pitch,
-                    roll  = state.roll,
-                    modifier = Modifier
-                        .size(180.dp)
-                        .align(Alignment.Center)
+            ) {
+                // Preview surface
+                ViewfinderSurface(
+                    modifier = Modifier.fillMaxSize(),
+                    viewModel = viewModel
                 )
-            }
 
-            // ── Timer countdown overlay ────────────────────────────────────────
-            if (state.timerCountdown > 0) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color(0x44000000)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = state.timerCountdown.toString(),
-                        color = OrangePrimary,
-                        fontSize = 120.sp,
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = FontFamily.Monospace
+                // ── Grid overlay ───────────────────────────────────────────────────
+                GridOverlay(
+                    gridMode = state.gridMode,
+                    modifier = Modifier.fillMaxSize()
+                )
+
+                // ── Level indicator ────────────────────────────────────────────────
+                if (state.showLevelIndicator) {
+                    LevelIndicator(
+                        pitch = state.pitch,
+                        roll = state.roll,
+                        modifier = Modifier
+                            .size(180.dp)
+                            .align(Alignment.Center)
                     )
                 }
-            }
 
-            // ── Recording indicator ────────────────────────────────────────────
-            if (state.isRecording) {
-                RecordingIndicator(
-                    durationSec = state.recordingDurationSec,
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(end = 12.dp, top = 12.dp)
-                )
-            }
+                // ── Timer countdown overlay ────────────────────────────────────────
+                if (state.timerCountdown > 0) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color(0x44000000)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = state.timerCountdown.toString(),
+                            color = OrangePrimary,
+                            fontSize = 120.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = FontFamily.Monospace
+                        )
+                    }
+                }
 
-            // ── Camera parameters HUD ──────────────────────────────────────────
-            CameraParamsHud(
-                state = state,
-                modifier = Modifier
-                    .align(Alignment.CenterStart)
-                    .padding(start = 8.dp)
-            )
+                // ── Recording indicator ────────────────────────────────────────────
+                if (state.isRecording) {
+                    RecordingIndicator(
+                        durationSec = state.recordingDurationSec,
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(end = 12.dp, top = 12.dp)
+                    )
+                }
 
-            // ── Snackbar messages ──────────────────────────────────────────────
-            state.savedMessage?.let { msg ->
-                SnackMessage(
-                    message = msg,
-                    color = Color(0xFF4CAF50),
+                // ── Camera parameters HUD ──────────────────────────────────────────
+                CameraParamsHud(
+                    state = state,
                     modifier = Modifier
-                        .align(Alignment.TopCenter)
-                        .padding(top = 60.dp)
+                        .align(Alignment.CenterStart)
+                        .padding(start = 8.dp)
                 )
-            }
-            state.errorMessage?.let { msg ->
-                SnackMessage(
-                    message = msg,
-                    color = RecordRed,
-                    modifier = Modifier
-                        .align(Alignment.TopCenter)
-                        .padding(top = 60.dp)
-                )
+
+                // ── Snackbar messages ──────────────────────────────────────────────
+                state.savedMessage?.let { msg ->
+                    SnackMessage(
+                        message = msg,
+                        color = Color(0xFF4CAF50),
+                        modifier = Modifier
+                            .align(Alignment.TopCenter)
+                            .padding(top = 60.dp)
+                    )
+                }
+                state.errorMessage?.let { msg ->
+                    SnackMessage(
+                        message = msg,
+                        color = RecordRed,
+                        modifier = Modifier
+                            .align(Alignment.TopCenter)
+                            .padding(top = 60.dp)
+                    )
+                }
             }
         }
 
