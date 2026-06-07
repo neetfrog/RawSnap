@@ -24,6 +24,8 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
     // Track whether surface arrived before camera was ready
     private var pendingSurface: SurfaceTexture? = null
     private var pendingSurfaceSize: Pair<Int, Int>? = null
+    private var currentSurfaceTexture: SurfaceTexture? = null
+    private var currentSurfaceSize: Pair<Int, Int>? = null
 
     private var recordingDurationJob: Job? = null
     private var timerJob: Job? = null
@@ -77,11 +79,12 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
                         minFocusDistance = caps.minFocusDistance
                     )
                 }
-                // If surface arrived before camera was ready, start preview now
-                pendingSurface?.let { st ->
-                    val (pendingWidth, pendingHeight) = pendingSurfaceSize ?: Pair(0, 0)
+
+                val surfaceTexture = currentSurfaceTexture ?: pendingSurface
+                val surfaceSize = currentSurfaceSize ?: pendingSurfaceSize
+                if (surfaceTexture != null && surfaceSize != null) {
                     withContext(Dispatchers.Main) {
-                        startPreview(st, pendingWidth, pendingHeight)
+                        startPreview(surfaceTexture, surfaceSize.first, surfaceSize.second)
                     }
                     pendingSurface = null
                     pendingSurfaceSize = null
@@ -94,6 +97,9 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
 
     /** Called when the TextureView surface is ready. */
     fun startPreview(surfaceTexture: SurfaceTexture, width: Int, height: Int) {
+        currentSurfaceTexture = surfaceTexture
+        currentSurfaceSize = Pair(width, height)
+
         if (!camera2.isCameraOpen) {
             pendingSurface = surfaceTexture
             pendingSurfaceSize = Pair(width, height)

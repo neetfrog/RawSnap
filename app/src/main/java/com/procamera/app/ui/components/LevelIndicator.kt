@@ -79,13 +79,31 @@ fun LevelIndicator(
         val sinR = sin(rollRad).toFloat()
         val dx = barLen * cosR
         val dy = barLen * sinR
-        val barCenter = Offset(cx, cy)
+        val pitchOffset = (pitch.coerceIn(-30f, 30f) / 30f) * (ringR * 0.9f)
+        val barCenter = Offset(cx - pitchOffset * sinR, cy + pitchOffset * cosR)
         drawLine(
             color = levelColor.copy(alpha = alpha),
             start = Offset(barCenter.x - dx, barCenter.y - dy),
             end   = Offset(barCenter.x + dx, barCenter.y + dy),
             strokeWidth = 4f,
             cap = StrokeCap.Round
+        )
+
+        // ── Level bubble (roll + pitch) ─────────────────────────────────────────
+        val bubbleRadius = 8f
+        val bubbleOffset = Offset(
+            (roll.coerceIn(-30f, 30f) / 30f) * ringR,
+            -(pitch.coerceIn(-30f, 30f) / 30f) * ringR
+        )
+        drawCircle(
+            color = Color.White.copy(alpha = 0.7f),
+            radius = bubbleRadius,
+            center = Offset(cx, cy) + bubbleOffset
+        )
+        drawCircle(
+            color = levelColor,
+            radius = bubbleRadius - 3f,
+            center = Offset(cx, cy) + bubbleOffset
         )
 
         // ── Centre reticle ─────────────────────────────────────────────────────
@@ -96,7 +114,7 @@ fun LevelIndicator(
             start = Offset(cx, cy - cs), end = Offset(cx, cy + cs), strokeWidth = 3f)
         drawCircle(
             color = levelColor.copy(alpha = 0.4f),
-            radius = 5f,
+            radius = 6f,
             center = Offset(cx, cy),
             style = Stroke(width = 2f)
         )
