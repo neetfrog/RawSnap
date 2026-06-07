@@ -49,7 +49,8 @@ data class CameraSettings(
 
     // Video
     val frameRate: Int = 30,
-    val videoResolution: VideoResolution = VideoResolution.FHD_1080P
+    val videoResolution: VideoResolution = VideoResolution.FHD_1080P,
+    val isFlatVideoMode: Boolean = false
 )
 
 // ─── Histogram data ───────────────────────────────────────────────────────────

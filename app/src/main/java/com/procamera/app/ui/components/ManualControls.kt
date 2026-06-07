@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import java.util.Locale
 import kotlin.math.roundToInt
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -206,6 +207,19 @@ fun ManualControls(
             )
         }
 
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("FLAT VIDEO", color = Color(0xAAFFFFFF), fontSize = 10.sp)
+            Switch(
+                checked = s.isFlatVideoMode,
+                onCheckedChange = { viewModel.updateSetting { st -> st.copy(isFlatVideoMode = it) } },
+                colors = SwitchDefaults.colors(checkedThumbColor = OrangePrimary, checkedTrackColor = OrangePrimary.copy(alpha = 0.4f))
+            )
+        }
+
         Spacer(Modifier.height(20.dp))
     }
 }
@@ -333,8 +347,12 @@ private fun formatShutter(ss: Float): String = when {
     else       -> "${(1f / ss).roundToInt()}s"
 }
 
-private fun formatEv(ev: Int): String = when {
-    ev > 0  -> "+${ev / 3f}"
-    ev < 0  -> "${ev / 3f}"
-    else    -> "0"
+private fun formatEv(ev: Int): String {
+    val value = ev / 3f
+    val formatted = if (value % 1f == 0f) {
+        value.toInt().toString()
+    } else {
+        String.format(Locale.US, "%.1f", value)
+    }
+    return if (value > 0) "+$formatted" else formatted
 }

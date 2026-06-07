@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.procamera.app"
+    namespace = "com.rawsnap.app"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.procamera.app"
+        applicationId = "com.rawsnap.app"
         minSdk = 24
         targetSdk = 34
         versionCode = 1

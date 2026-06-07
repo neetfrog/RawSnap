@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "ProCamera"
+rootProject.name = "RawSnap"
 include(":app")

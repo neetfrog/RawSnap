@@ -1,4 +1,4 @@
-# ProCamera — Fully Featured Android Camera App
+# RawSnap — Fully Featured Android Camera App
 
 Professional Android camera app built with **Camera2 API** + **Jetpack Compose**.
 
@@ -84,9 +84,9 @@ RAW capture uses `ImageFormat.RAW_SENSOR` and `DngCreator` (Android standard). T
 
 | Type  | Location                                        |
 |-------|-------------------------------------------------|
-| JPEG  | `<External>/Android/data/com.procamera.app/files/DCIM/ProCamera/` |
+| JPEG  | `<External>/Android/data/com.rawsnap.app/files/DCIM/RawSnap/` |
 | DNG   | same as JPEG                                    |
-| Video | `<External>/Android/data/com.procamera.app/files/Movies/ProCamera/` |
+| Video | `<External>/Android/data/com.rawsnap.app/files/Movies/RawSnap/` |
 
 ## Permissions
 

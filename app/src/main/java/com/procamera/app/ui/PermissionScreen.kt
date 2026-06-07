@@ -36,7 +36,7 @@ fun PermissionScreen(onRequestPermissions: () -> Unit) {
         Spacer(Modifier.height(24.dp))
 
         Text(
-            text = "ProCamera",
+            text = "RawSnap",
             color = Color.White,
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold,

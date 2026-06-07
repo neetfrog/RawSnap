@@ -164,7 +164,7 @@ class VideoRecorder(private val context: Context) {
             put(MediaStore.Video.Media.MIME_TYPE, "video/mp4")
             put(MediaStore.Video.Media.DATE_ADDED, System.currentTimeMillis() / 1000)
             put(MediaStore.Video.Media.DATE_TAKEN, System.currentTimeMillis())
-            put(MediaStore.Video.Media.RELATIVE_PATH, "Movies/ProCamera")
+            put(MediaStore.Video.Media.RELATIVE_PATH, "Movies/RawSnap")
             put(MediaStore.Video.Media.IS_PENDING, 1)
         }
         return context.contentResolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, values)
@@ -189,7 +189,7 @@ class VideoRecorder(private val context: Context) {
 
     private fun createVideoFile(): File {
         val publicMovies = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES)
-        val dir = File(publicMovies, "ProCamera").apply {
+        val dir = File(publicMovies, "RawSnap").apply {
             if (!exists() && !mkdirs()) {
                 Log.w(TAG, "Failed to create directory: ${absolutePath}")
             }

@@ -1,8 +1,8 @@
 <resources>
-    <string name="app_name">ProCamera</string>
+    <string name="app_name">RawSnap</string>
     <string name="permission_camera_title">Camera Permission Required</string>
-    <string name="permission_camera_msg">ProCamera needs camera access to take photos and videos.</string>
-    <string name="permission_audio_msg">ProCamera needs microphone access to record audio with video.</string>
+    <string name="permission_camera_msg">RawSnap needs camera access to take photos and videos.</string>
+    <string name="permission_audio_msg">RawSnap needs microphone access to record audio with video.</string>
     <string name="grant_permissions">Grant Permissions</string>
     <string name="photo_saved">Photo saved</string>
     <string name="raw_saved">RAW saved</string>

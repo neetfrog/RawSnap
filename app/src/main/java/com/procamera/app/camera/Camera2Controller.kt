@@ -408,6 +408,11 @@ class Camera2Controller(private val context: Context) {
             builder.set(CaptureRequest.TONEMAP_MODE, CameraMetadata.TONEMAP_MODE_FAST)
         }
 
+        // ── Flat video / low processing mode ────────────────────────────────────
+        if (isVideo && settings.isFlatVideoMode) {
+            builder.set(CaptureRequest.EDGE_MODE, CameraMetadata.EDGE_MODE_OFF)
+        }
+
         // ── Zoom ──────────────────────────────────────────────────────────────
         applyZoom(builder, settings.zoomRatio, chars)
 
@@ -426,7 +431,8 @@ class Camera2Controller(private val context: Context) {
         // ── Noise reduction ───────────────────────────────────────────────────
         builder.set(
             CaptureRequest.NOISE_REDUCTION_MODE,
-            if (settings.isAutoExposure) CameraMetadata.NOISE_REDUCTION_MODE_FAST
+            if (isVideo && settings.isFlatVideoMode) CameraMetadata.NOISE_REDUCTION_MODE_MINIMAL
+            else if (settings.isAutoExposure) CameraMetadata.NOISE_REDUCTION_MODE_FAST
             else CameraMetadata.NOISE_REDUCTION_MODE_MINIMAL
         )
     }
@@ -550,24 +556,24 @@ class Camera2Controller(private val context: Context) {
         try {
             val buf = image.planes[0].buffer
             val bytes = ByteArray(buf.remaining()).also { buf.get(it) }
-            
+
             val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmssSSS", Locale.US).format(Date())
             val fileName = "IMG_$timeStamp.jpg"
-            
+
             val contentValues = ContentValues().apply {
                 put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
                 put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    put(MediaStore.MediaColumns.RELATIVE_PATH, "DCIM/ProCamera")
+                    put(MediaStore.MediaColumns.RELATIVE_PATH, "DCIM/RawSnap")
                     put(MediaStore.MediaColumns.IS_PENDING, 1)
                 }
             }
-            
+
             val uri = context.contentResolver.insert(
                 MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
                 contentValues
             ) ?: throw Exception("Failed to create MediaStore entry")
-            
+
             context.contentResolver.openOutputStream(uri)?.use { stream ->
                 stream.write(bytes)
                 stream.flush()
@@ -579,7 +585,7 @@ class Camera2Controller(private val context: Context) {
                 }
                 context.contentResolver.update(uri, updateValues, null, null)
             }
-            
+
             Log.d(TAG, "Photo saved: $fileName")
             onPhotoSaved?.invoke(File(fileName))
         } catch (e: Exception) {
@@ -608,7 +614,7 @@ class Camera2Controller(private val context: Context) {
                 val contentValues = ContentValues().apply {
                     put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
                     put(MediaStore.MediaColumns.MIME_TYPE, "image/x-adobe-dng")
-                    put(MediaStore.MediaColumns.RELATIVE_PATH, "DCIM/ProCamera")
+                    put(MediaStore.MediaColumns.RELATIVE_PATH, "DCIM/RawSnap")
                     put(MediaStore.MediaColumns.IS_PENDING, 1)
                 }
 
@@ -631,7 +637,7 @@ class Camera2Controller(private val context: Context) {
                 Log.d(TAG, "DNG saved to MediaStore: $uri")
             } else {
                 val publicPictures = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
-                val folder = File(publicPictures, "ProCamera")
+                val folder = File(publicPictures, "RawSnap")
                 if (!folder.exists() && !folder.mkdirs()) {
                     throw Exception("Failed to create directory: ${folder.absolutePath}")
                 }
@@ -696,7 +702,7 @@ class Camera2Controller(private val context: Context) {
     // ─── File creation ────────────────────────────────────────────────────────
 
     private fun createOutputFile(prefix: String, ext: String, envDir: String): File {
-        val dir = File(context.getExternalFilesDir(envDir), "ProCamera").apply { mkdirs() }
+        val dir = File(context.getExternalFilesDir(envDir), "RawSnap").apply { mkdirs() }
         val ts = SimpleDateFormat("yyyyMMdd_HHmmssSSS", Locale.US).format(Date())
         return File(dir, "${prefix}_$ts.$ext")
     }
